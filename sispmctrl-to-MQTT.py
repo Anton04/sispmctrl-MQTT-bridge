@@ -77,6 +77,8 @@ while True:
             devices[filename] = dev
             states[filename] = [None,None,None,None]
             #publish
+            topic = PREFIX +"/"+ filename 
+            client.publish(topic , "Detected", 1)
     
     #Detect states changes on outlets
     

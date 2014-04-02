@@ -57,14 +57,17 @@ def on_message(a,mosq, msg):
     	topics = msg.topic.split("/")
     	name = topics[-2]
     	if topics[-1] == "set":
-    	    value = int(msg.payload)
+    	    value = msg.payload
     	    if not topics[-3] in devices:
     	        return
-    	 
+
+    	    print topics 
+	    print value
+ 
     	    device = devices[topics[-3]]
-    	    socket = int(topic[-2])
+    	    socket = int(topics[-2])
     	    
-    	    if topic.upper()== "ON" or topic == "1":
+    	    if value.upper()== "ON" or value == "1":
     	        #Turn on
     	        socket_on(device,socket)
     	    else:
@@ -89,7 +92,7 @@ def ControlLoop():
     
 
 
-client = mosquitto.Mosquitto("RFXcom-to-MQTT-client")
+client = mosquitto.Mosquitto("sispmctl-to-MQTT-client")
 
 
 #Connect and notify others of our presence. 

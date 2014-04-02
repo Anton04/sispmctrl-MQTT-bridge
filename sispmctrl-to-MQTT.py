@@ -6,26 +6,26 @@ import time
 import sys
 import  os
 
-def socket_off(num):
+def socket_off(device,socket):
     #print "turn socket",num,"off"
     #print "/usr/local/bin/sispmctl -f "+str(num)
-    os.system("/usr/bin/sispmctl -q -f "+str(num))
+    os.system("/usr/bin/sispmctl -q -d %i -f %i" %(device,socket))
 
-def socket_on(num):
+def socket_on(device,socket):
     #print "turn socket",num,"on"
-    os.system("/usr/bin/sispmctl -q -o "+str(num))
+    os.system("/usr/bin/sispmctl -q -d %i -o %i" %(device,socket))
     
 
 def socket_get_state(num):
     #print "get state of socket",num
     #fd=os.popen("/usr/local/bin/sispmctl -g "+str(num))
-    result=0
-    for line in os.popen("/usr/bin/sispmctl -q -n -g "+str(num)).readlines():
+    result=[]
+    for line in os.popen("/usr/bin/sispmctl -q -d %s -n -g all" % str(num)).readlines():
         #print "line: ",line       
         if line[0]=="0":
-            result=1
+            result.append(0)
         elif line[0]=="1":
-            result=0
+            result.append(1)
     return result
     
 def socket_get_serialnumbers():
@@ -35,7 +35,7 @@ def socket_get_serialnumbers():
     for line in os.popen("/usr/bin/sispmctl -s ").readlines():
         #print "line: ",line       
         if line.find("serial number") != -1:
-            Serial = l[3].strip("\n").split("    ")[1]
+            Serial = line.strip("\n").split("    ")[1]
             Devices[len(Devices)]=Serial
             
     return Devices

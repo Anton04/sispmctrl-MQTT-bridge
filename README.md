@@ -13,9 +13,9 @@ How to use:
 
 The command 
 
->mosquitto_pub -h brokerIP -t "sispmcltr/01:9a:78:de:45/4/set" -m On
+>mosquitto_pub -h brokerIP -t "sispmcltr/DEVICE_SERIAL/OUTLET/set" -m On
 
-Will turn on outlet 4 on the gembird device with the id 01:9a:78:de:45. 
+Will turn on outlet OUTLET (numbered 1-4) on the gembird device with the serial DEVICE_SERIAL. 
 
 To get the ids run: 
 >sispmctl -s  

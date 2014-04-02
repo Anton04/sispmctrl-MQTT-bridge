@@ -3,6 +3,42 @@ import mosquitto,sys
 import json
 import thread
 import time
+import sys
+import  os
+
+def socket_off(num):
+    #print "turn socket",num,"off"
+    #print "/usr/local/bin/sispmctl -f "+str(num)
+    os.system("/usr/bin/sispmctl -q -f "+str(num))
+
+def socket_on(num):
+    #print "turn socket",num,"on"
+    os.system("/usr/bin/sispmctl -q -o "+str(num))
+    
+
+def socket_get_state(num):
+    #print "get state of socket",num
+    #fd=os.popen("/usr/local/bin/sispmctl -g "+str(num))
+    result=0
+    for line in os.popen("/usr/bin/sispmctl -q -n -g "+str(num)).readlines():
+        #print "line: ",line       
+        if line[0]=="0":
+            result=1
+        elif line[0]=="1":
+            result=0
+    return result
+    
+def socket_get_serialnumbers():
+    #print "get state of socket",num
+    #fd=os.popen("/usr/local/bin/sispmctl -g "+str(num))
+    Devices = {}
+    for line in os.popen("/usr/bin/sispmctl -s ").readlines():
+        #print "line: ",line       
+        if line.find("serial number") != -1:
+            Serial = l[3].strip("\n").split("    ")[1]
+            Devices[len(Devices)]=Serial
+            
+    return Devices
 
 #The MQTT format for setting outlets are PREFIX/DEVICE_ID/OUTLET/set 
 

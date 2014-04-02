@@ -61,8 +61,8 @@ def on_message(a,mosq, msg):
     	    if not topics[-3] in devices:
     	        return
 
-    	    print topics 
-	    print value
+    	    #print topics 
+	    #print value
  
     	    device = devices[topics[-3]]
     	    socket = int(topics[-2])

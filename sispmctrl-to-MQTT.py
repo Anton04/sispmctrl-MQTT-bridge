@@ -118,7 +118,14 @@ while True:
     #Look for disconnections..
     for device in old_devices:
         if not device in devices:
-            topic = PREFIX +"/"+ device + "/connected", False)
+            topic = PREFIX +"/"+ device + "/connected"
+            client.publish(topic , False, 1)
+            
+    #Look for devices being connected..
+    for device in devices:
+        if not device in old_devices:
+            topic = PREFIX +"/"+ device + "/connected"
+            client.publish(topic , True, 1)
             
     #Detect states changes on outlets
     #for device in devices:

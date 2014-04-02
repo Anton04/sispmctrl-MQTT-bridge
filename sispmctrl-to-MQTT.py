@@ -4,7 +4,14 @@ import json
 import thread
 import time
 import sys
-import  os
+import os
+
+#The MQTT format for setting outlets are PREFIX/DEVICE_ID/OUTLET/set 
+
+PREFIX = "sispmcltr"
+MQTT_HOST = "localhost"
+POLL_TIME = 5 #For checking state changes on outlets. 
+
 
 def socket_off(device,socket):
     #print "turn socket",num,"off"
@@ -36,15 +43,9 @@ def socket_get_serialnumbers():
         #print "line: ",line       
         if line.find("serial number") != -1:
             Serial = line.strip("\n").split("    ")[1]
-            Devices[len(Devices)]=Serial
+            Devices[Serial]=len(Devices)
             
     return Devices
-
-#The MQTT format for setting outlets are PREFIX/DEVICE_ID/OUTLET/set 
-
-PREFIX = "sispmcltr"
-MQTT_HOST = "localhost"
-POLL_TIME = 5 #For checking state changes on outlets. 
 
 def on_connect(mosq, rc,a):
     mosq.subscribe(PREFIX+"/#", 0)
@@ -60,8 +61,16 @@ def on_message(a,mosq, msg):
     	    value = int(msg.payload)
     	    if not topics[-3] in devices:
     	        return
+    	 
+    	    device = devices[topics[-3]]
+    	    socket = int(topic[-2])
     	    
-    	    devices[topics[-3]].set_outlet_enabled(int(topic[-2]),bool(value))
+    	    if topic.upper()== "ON" or topic == "1":
+    	        #Turn on
+    	        socket_on(device,socket)
+    	    else:
+    	        #Turn off
+    	        socket_off(device,socket)
     	    
     #except:
     #   print "Error occured while processing command"
@@ -103,21 +112,17 @@ while True:
    #Send update if it did. 
     
     #Detect devices
-    n = sispm.get_num_devices()
+    old_devices = devices
+    devices = socket_get_serialnumbers()
     
-    for f in range (0,n):
-        dev=sispm.Sispm(f)
-        filename = dev.device.filename
-        
-        if not filename in devices:
-            devices[filename] = dev
-            states[filename] = [None,None,None,None]
-            #publish
-            topic = PREFIX +"/"+ filename 
-            client.publish(topic , "Detected", 1)
-    
+    #Look for disconnections..
+    for device in old_devices:
+        if not device in devices:
+            topic = PREFIX +"/"+ device + "/connected", False)
+            
     #Detect states changes on outlets
-    
+    #for device in devices:
+        
     
     time.sleep(POLL_TIME)    
        

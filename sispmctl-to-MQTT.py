@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import mosquitto,sys
 import json
 import thread

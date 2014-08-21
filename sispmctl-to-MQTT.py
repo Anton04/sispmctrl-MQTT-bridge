@@ -100,18 +100,18 @@ if __name__ == '__main__':
 	try:
 		ConfigFile = sys.argv[1]
 	except:
-		ConfigFile = path + "/NEEG2MQTT.conf"
+		ConfigFile = path + "/sispmctrl.conf"
 
 	try:
 		f = open(ConfigFile,"r")
 		f.close()
 	except:
 		try:
-			ConfigFile = path + "/NEEG2MQTT.conf"
+			ConfigFile = path + "/sispmctrl.conf"
 			f = open(ConfigFile,"r")
                 	f.close()
 		except:
-			print "Please provide a valid config file! By argument or as default Plugwise2MQTT.cfg file."
+			print "Please provide a valid config file! By argument or as default sispmctrl.conf file."
 			exit(1)
 	config = ConfigParser.RawConfigParser(allow_no_value=True)
 	config.read(ConfigFile)

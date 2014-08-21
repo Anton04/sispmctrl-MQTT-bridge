@@ -10,8 +10,6 @@ import ConfigParser
 
 #The MQTT format for setting outlets are PREFIX/DEVICE_ID/OUTLET/set 
 
-PREFIX = "sispmcltr"
-MQTT_HOST = "localhost"
 POLL_TIME = 5 #For checking state changes on outlets. 
 
 
@@ -50,7 +48,7 @@ def socket_get_serialnumbers():
     return Devices
 
 def on_connect(mosq, rc,a):
-    mosq.subscribe(PREFIX+"/#", 0)
+    mosq.subscribe(prefix+"/#", 0)
 
 def on_message(a,mosq, msg):
     global devices
@@ -138,6 +136,7 @@ if __name__ == '__main__':
 	client.publish("system/" + prefix, "Online",1, retain=True)
 	client.on_connect = on_connect
 	client.on_message = on_message
+	client.subscribe(prefix+"/#", 0)
 
 	#Init
 	

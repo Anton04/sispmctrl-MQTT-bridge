@@ -89,54 +89,89 @@ def ControlLoop():
 
 
 #Get all devices.
+if __name__ == '__main__':
 
 
-    
+	#Where am I 
+	path = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+	#Load config file... 	
+
+	try:
+		ConfigFile = sys.argv[1]
+	except:
+		ConfigFile = path + "/NEEG2MQTT.conf"
+
+	try:
+		f = open(ConfigFile,"r")
+		f.close()
+	except:
+		try:
+			ConfigFile = path + "/NEEG2MQTT.conf"
+			f = open(ConfigFile,"r")
+                	f.close()
+		except:
+			print "Please provide a valid config file! By argument or as default Plugwise2MQTT.cfg file."
+			exit(1)
+	config = ConfigParser.RawConfigParser(allow_no_value=True)
+	config.read(ConfigFile)
 
 
-client = mosquitto.Mosquitto("sispmctl-to-MQTT-client")
+	#Load basic config. 
+	ip = config.get("MQTTServer","Address")
+	port = config.get("MQTTServer","Port")
+	user = config.get("MQTTServer","User")
+	password = config.get("MQTTServer","Password")
+	prefix = config.get("MQTTServer","Prefix")   
 
 
-#Connect and notify others of our presence. 
-client.connect(MQTT_HOST)
-client.publish("system/sispmctrl-to-MQTT", "Online",1)
-client.on_connect = on_connect
-client.on_message = on_message
+	client = mosquitto.Mosquitto("sispmctl-to-MQTT-client")
 
-#Init
+	if user != None:
+    			client.username_pw_set(user,password)
 
-devices = {}
-states = {}
+	client.will_set( topic =  "system/" + prefix, payload="Offline", qos=1, retain=True)
 
-#Start tread...
-thread.start_new_thread(ControlLoop,())
+	#Connect and notify others of our presence. 
+	client.connect(ip)
+	client.publish("system/" + prefix, "Online",1, retain=True)
+	client.on_connect = on_connect
+	client.on_message = on_message
 
-while True:
-   #Check if anything changed
-   #Send update if it did. 
-    
-    #Detect devices
-    old_devices = devices
-    devices = socket_get_serialnumbers()
-    
-    #Look for disconnections..
-    for device in old_devices:
-        if not device in devices:
-            topic = PREFIX +"/"+ device + "/connected"
-            client.publish(topic , False, 1)
-            
-    #Look for devices being connected..
-    for device in devices:
-        if not device in old_devices:
-            topic = PREFIX +"/"+ device + "/connected"
-            client.publish(topic , True, 1)
-            
-    #Detect states changes on outlets
-    #for device in devices:
-        
-    
-    time.sleep(POLL_TIME)    
-       
-    
-    
-client.disconnect() 
+	#Init
+	
+	devices = {}
+	states = {}
+	
+	#Start tread...
+	thread.start_new_thread(ControlLoop,())
+	
+	while True:
+	   #Check if anything changed
+	   #Send update if it did. 
+	    
+	    #Detect devices
+	    old_devices = devices
+	    devices = socket_get_serialnumbers()
+	    
+	    #Look for disconnections..
+	    for device in old_devices:
+	        if not device in devices:
+	            topic = prefix +"/"+ device + "/connected"
+	            client.publish(topic , False, 1)
+	            
+	    #Look for devices being connected..
+	    for device in devices:
+	        if not device in old_devices:
+	            topic = prefix +"/"+ device + "/connected"
+	            client.publish(topic , True, 1)
+	            
+	    #Detect states changes on outlets
+	    #for device in devices:
+	        
+	    
+	    time.sleep(POLL_TIME)    
+	       
+	    
+	    
+	client.disconnect() 
